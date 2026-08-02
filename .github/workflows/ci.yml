@@ -1,0 +1,31 @@
+name: Build & Test CI
+
+# Pipeline ini akan berjalan setiap ada 'git push' ke branch main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Ambil kode dari repositori GitHub
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # 2. Siapkan Node.js di server GitHub
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    # 3. Install dependensi & tes apakah aplikasi error
+    - name: Install Dependencies
+      run: npm ci
+
+    # 4. Tes build Docker Image secara otomatis
+    - name: Build Docker Image
+      run: docker build -t devops-microservice:latest .
