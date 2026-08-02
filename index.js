@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3000;
 // Endpoint 1: Pesan Selamat Datang
 app.get('/', (req, res) => {
   res.json({ 
-    message: "Hello World! Mikro proyek DevOps dimulai.",
+    message: "SUDAH DEPLOY! Selamat datang di microservice DevOps.",
     timestamp: new Date()
   });
 });
