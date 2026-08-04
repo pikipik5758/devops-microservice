@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Service 1: Aplikasi Express API
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://admin:rahasia123@db:5432/devops_db
+    depends_on:
+      - db
+
+  # Service 2: Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: rahasia123
+      POSTGRES_DB: devops_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+# Volume agar data database TIDAK HILANG saat container dimatikan
+volumes:
+  pgdata:
