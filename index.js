@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/devops_db',
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 // Endpoint 1: Pesan Selamat Datang
