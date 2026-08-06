@@ -1,31 +1,39 @@
-name: Build & Test CI
+name: DevOps CI Pipeline
 
-# Pipeline ini akan berjalan setiap ada 'git push' ke branch main
+# Kapan robot ini harus bekerja?
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
+# Apa tugas (jobs) yang harus dikerjakan?
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  test-and-build:
+    name: 🛠️ Uji Kode & Docker
+    runs-on: ubuntu-latest # Komputer virtual yang disediakan gratis oleh GitHub
 
     steps:
-    # 1. Ambil kode dari repositori GitHub
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      # 1. Robot mengunduh kodemu dari repositori
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
 
-    # 2. Siapkan Node.js di server GitHub
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      # 2. Robot menyiapkan environment Node.js versi 18
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-    # 3. Install dependensi & tes apakah aplikasi error
-    - name: Install Dependencies
-      run: npm ci
+      # 3. Robot mencoba menginstal dependency (memastikan package.json aman)
+      - name: 📦 Install Dependencies
+        run: npm install
 
-    # 4. Tes build Docker Image secara otomatis
-    - name: Build Docker Image
-      run: docker build -t devops-microservice:latest .
+        # 🧪 SISIPKAN STEP INI
+      - name: 🧪 Run Automated API Tests
+        run: npm test
+        env:
+          NODE_ENV: test
+
+      # 4. Robot melakukan simulasi build Docker image (memastikan Dockerfile aman)
+      - name: 🐳 Test Docker Build
+        run: docker build -t devops-app-test .

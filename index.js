@@ -122,6 +122,12 @@ app.delete('/users/:id', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Jalankan server hanya jika BUKAN dalam mode testing
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Ekspor app agar bisa diuji oleh Jest
+module.exports = app;
