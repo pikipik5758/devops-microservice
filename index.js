@@ -80,6 +80,48 @@ app.post('/users', async (req, res) => {
   }
 });
 
+// 5. UPDATE: Mengubah Data User Berdasarkan ID
+app.put('/users/:id', async (req, res) => {
+  const { id } = req.params; // Mengambil ID dari URL (/users/1)
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ success: false, message: 'Name dan Email wajib diisi!' });
+  }
+
+  try {
+    const result = await pool.query(
+      'UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *',
+      [name, email, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User tidak ditemukan!' });
+    }
+
+    res.json({ success: true, message: 'User berhasil diperbarui! ✏️', data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6. DELETE: Menghapus User Berdasarkan ID
+app.delete('/users/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User tidak ditemukan!' });
+    }
+
+    res.json({ success: true, message: 'User berhasil dihapus! 🗑️', data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
