@@ -1,20 +1,20 @@
-# 1. Pilih Base Image
-FROM node:18-alpine
+# ===== STAGE 1: Build & Dependencies =====
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+# npm ci lebih cepat dan konsisten dibanding npm install untuk lingkungan CI/Production
+RUN npm ci --only=production
 
-# 2. Tentukan Direktori Kerja di dalam Container
+# ===== STAGE 2: Production Runtime =====
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# 3. Salin file manajemen paket
-COPY package*.json ./
-
-# 4. Install dependensi
-RUN npm install --only=production
-
-# 5. Salin seluruh kode aplikasi
+# Salin folder node_modules yang sudah bersih dari STAGE 1
+COPY --from=builder /app/node_modules ./node_modules
 COPY . .
 
-# 6. Deklarasikan Port
-EXPOSE 3000
+# Keamanan Tambahan: Gunakan user non-root bawaan Node.js
+USER node
 
-# 7. Perintah Utama untuk Menjalankan Aplikasi
+EXPOSE 3000
 CMD ["node", "index.js"]
