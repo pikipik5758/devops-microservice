@@ -1,39 +1,49 @@
 name: DevOps CI Pipeline
 
-# Kapan robot ini harus bekerja?
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
-# Apa tugas (jobs) yang harus dikerjakan?
 jobs:
   test-and-build:
     name: 🛠️ Uji Kode & Docker
-    runs-on: ubuntu-latest # Komputer virtual yang disediakan gratis oleh GitHub
+    runs-on: ubuntu-latest
+
+    # 🐘 Sedia database PostgreSQL otomatis khusus untuk testing
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: rahasia123
+          POSTGRES_DB: devops_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      # 1. Robot mengunduh kodemu dari repositori
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Robot menyiapkan environment Node.js versi 18
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      # 3. Robot mencoba menginstal dependency (memastikan package.json aman)
       - name: 📦 Install Dependencies
-        run: npm install
+        run: npm ci
 
-        # 🧪 SISIPKAN STEP INI
       - name: 🧪 Run Automated API Tests
         run: npm test
         env:
           NODE_ENV: test
+          DATABASE_URL: postgresql://admin:rahasia123@localhost:5432/devops_db
 
-      # 4. Robot melakukan simulasi build Docker image (memastikan Dockerfile aman)
       - name: 🐳 Test Docker Build
         run: docker build -t devops-app-test .
