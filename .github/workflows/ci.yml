@@ -47,3 +47,23 @@ jobs:
 
       - name: 🐳 Test Docker Build
         run: docker build -t devops-app-test .
+
+  # ==========================================
+  # JOB 2: DEPLOYMENT (CD)
+  # ==========================================
+  deploy:
+    name: 🚀 Deploy ke Railway
+    needs: test-and-build # 👈 Wajib lulus test (CI) dulu baru boleh jalan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' # 👈 Hanya jalan saat merge ke main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Install Railway CLI & Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          railway up --service devops-microservice
