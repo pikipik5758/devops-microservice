@@ -1,4 +1,4 @@
-name: DevOps CI Pipeline
+name: DevOps CI/CD Pipeline
 
 on:
   push:
@@ -7,11 +7,13 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # ==========================================
+  # JOB 1: TESTING (CI)
+  # ==========================================
   test-and-build:
     name: 🛠️ Uji Kode & Docker
     runs-on: ubuntu-latest
 
-    # 🐘 Sedia database PostgreSQL otomatis khusus untuk testing
     services:
       postgres:
         image: postgres:15-alpine
@@ -53,8 +55,8 @@ jobs:
   # ==========================================
   deploy:
     name: 🚀 Deploy ke Railway
-    needs: test-and-build # 👈 Wajib lulus test (CI) dulu baru boleh jalan
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' # 👈 Hanya jalan saat merge ke main
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
@@ -65,5 +67,5 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          npm install -g @railway/cli
+          curl -fsSL https://railway.app/install.sh | sh
           railway up --service devops-microservice
